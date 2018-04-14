@@ -1,0 +1,28 @@
+.logon edwtest1.intra.qa.com/student01,student01;
+
+.LABEL DELETEA
+DELETE FROM education.emp_mgr ALL;
+
+
+.IF ERRORCODE   = 0    THEN .GOTO NORMALEOJ 
+.IF ERRORCODE  <> 0 THEN .GOTO CREATEA 
+
+.LABEL CREATEA
+ CREATE SET TABLE education.emp_mgr ,FALLBACK ,
+     NO BEFORE JOURNAL,
+     NO AFTER JOURNAL,
+     CHECKSUM = DEFAULT,
+     DEFAULT MERGEBLOCKRATIO
+     (
+      employee_number INTEGER,
+      manager_employee_number INTEGER)
+UNIQUE PRIMARY INDEX ( employee_number );
+
+.IF ERRORCODE <> 0 THEN .GOTO SQLFAIL
+
+.LABEL SQLFAIL
+.QUIT ERRORCODE
+
+.LABEL NORMALEOJ
+.QUIT 0
+

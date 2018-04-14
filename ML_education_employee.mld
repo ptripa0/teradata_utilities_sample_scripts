@@ -1,0 +1,88 @@
+/*----------------------------------------------------------------------
+--                                                                               
+--NAME:                       ML_education_employee.mld                        
+--DESCRIPTION:                This TD Utility script is used for ETL qa purposes          
+--INPUT FILE:                 education_employee.txt                                         
+--LOAD TABLE:                 education.employee                                                                                                
+--AUTHOR:                     Prabodh Tripathi                            
+--CREATED:                    2014/07/05                                 
+--VERSION:                    1.0                                                
+--                                                                               
+-----------------------------------------------------------------------                                                                                     
+-----------------------------------------------------------------------*/ 
+
+.LOGTABLE education.employee_LG;
+                      
+.LOGON edwtest1.intra.searshc.com/student01,student01; 
+                                    
+DATABASE education;
+                                                                                                                         
+DROP TABLE education.employee_WT ;                         
+DROP TABLE education.employee_E1 ;                      
+DROP TABLE education.employee_E2 ;                       
+                                                                          
+.BEGIN IMPORT MLOAD                                                    
+    TABLES                                                               
+        education.employee                                
+    WORKTABLES                                                           
+        education.employee_WT                            
+    ERRORTABLES                                                          
+        education.employee_E1                                
+        education.employee_E2  
+                                                                                                                                  
+    SESSIONS 12 
+
+    TENACITY 4
+    SLEEP 5 ;      
+
+.LAYOUT employee_layout
+;
+
+.FIELD employee_number                *  VARCHAR(15);
+.FIELD manager_employee_number        *  VARCHAR(15);
+.FIELD department_number              *  VARCHAR(15);
+.FIELD job_code                       *  VARCHAR(15);
+.FIELD last_name                      *  VARCHAR(20);
+.FIELD first_name                     *  VARCHAR(30);
+.FIELD hire_date                      *  VARCHAR(8);
+.FIELD birthdate                      *  VARCHAR(8);
+.FIELD salary_amount                  *  VARCHAR(14);
+
+.DML LABEL DML_employee;    
+
+ INSERT INTO education.employee                      
+(    
+	employee_number
+	,manager_employee_number
+	,department_number
+	,job_code
+	,last_name
+	,first_name
+	,hire_date
+	,birthdate
+	,salary_amount
+)                                                                             
+   VALUES                                                                   
+(
+	:employee_number
+	,nullif(:manager_employee_number,'^')
+	,nullif(:department_number,'^')
+	,:job_code
+	,:last_name
+	,:first_name
+	,cast(:hire_date as date format 'yyyymmdd')
+	,cast(:birthdate as date format 'yyyymmdd')
+	,:salary_amount
+);
+                                                                           
+
+.IMPORT
+    INFILE /home2/pripa/ScriptGenerator/LandingPad/education_employee.txt    
+    FORMAT VARTEXT '|'   
+
+LAYOUT employee_layout    
+APPLY DML_employee ;
+  
+.END MLOAD;               
+.LOGOFF; 
+

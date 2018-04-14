@@ -1,0 +1,12 @@
+.logtable qareport.FEXP_TEST_LOG;
+.logon 10.200.100.52/dbc,dbc;
+.BEGIN EXPORT;
+.EXPORT MODE RECORD FORMAT TEXT OUTFILE /root/qa/fexp_qareport_t1.csv;
+select
+CAST(order_id AS VARCHAR(20))||','||
+CAST(order_date AS VARCHAR(20))||','||
+CAST(product_id AS VARCHAR(20))
+from
+qareport.t1;
+.END EXPORT;
+.LOGOFF;
